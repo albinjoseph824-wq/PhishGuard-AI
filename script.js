@@ -172,12 +172,20 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    historyList.innerHTML = history.map(item => `
-      <button class="history-item" data-history-url="${escapeHtml(item.url)}">
-        <span>${escapeHtml(item.host)}</span>
-        <b>${item.score}/100</b>
-      </button>
-    `).join("");
+    historyList.innerHTML = history.map(item => {
+      const level = item.score >= 70 ? "high" : item.score >= 40 ? "medium" : "low";
+      const icon = level === "high" ? "!" : level === "medium" ? "!" : "✓";
+      const shortHost = item.host || item.url.replace(/^https?:\/\//i, "").split("/")[0];
+      return `
+        <button class="history-item" data-history-url="${escapeHtml(item.url)}" type="button">
+          <span class="history-icon ${level}">${icon}</span>
+          <span>
+            <span class="history-url">${escapeHtml(shortHost)}</span>
+            <span class="history-label">${escapeHtml(item.verdict || (level === "high" ? "HIGH RISK" : level === "medium" ? "SUSPICIOUS" : "LOW RISK"))}</span>
+          </span>
+          <span class="history-score">${item.score}/100</span>
+        </button>`;
+    }).join("");
 
     historyList.querySelectorAll("[data-history-url]").forEach(btn => {
       btn.addEventListener("click", () => {
